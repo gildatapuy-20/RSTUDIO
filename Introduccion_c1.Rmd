@@ -1,0 +1,190 @@
+---
+title: "Introducción a R"
+author: "GUALAPURO, Moisés"
+date: "2023-07-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introducción
+
+## Tipos de datos
+
+### Vectores
+Es una lista de elementos
+```{r}
+edades = c(21, 27, 21, 24, 23, 24)
+edades[-1]
+```
+
+
+### Listas
+Conjunto de datos múltiples
+
+```{r}
+estudiantes = list(nombres = c("Michael", "Dayan"), 
+                   edades = c(21, 27))
+estudiantes$edades[2]
+```
+
+### Dataframe
+
+Tabla de datos organizados en filas y columnas.
+
+```{r}
+estudiantes = data.frame(list(nombres = c("Michael", "Dayan"), 
+                   edades = c(21, 27))) 
+estudiantes$edades[2]
+```
+
+# Data precargada en R
+
+```{r}
+head(InsectSprays,2)
+```
+
+**Exploración de los datos**: tipos de datos y estadísticas básicas.
+```{r}
+str(InsectSprays)
+```
+
+
+```{r}
+summary(InsectSprays)
+```
+
+### Visualización exploratoria
+
+```{r}
+plot(InsectSprays)
+```
+
+Se tiene seis grupos de insecticidas, donde la cantidad de insectos para los insectidass tipo A, B y F son mayores que las de tipo C, D, E. 
+## Análisis
+
+$Ho:$ La cantidad de insectos en todos los tipos de insecticida son iguales. 
+
+$Ha:$ La cantidad de insectos en al menos uno de los tipos de insecticida es diferente.
+
+```{r}
+library(dplyr)
+resumen = InsectSprays %>% group_by(spray) %>%  
+  summarise(mean = mean(count), 
+            sd = sd(count),
+            n = n(), 
+            se = sd/sqrt(n))
+resumen
+```
+
+### Prueba de hipóteisis (ANOVA)
+
+```{r}
+anova(lm(count ~ spray, data = InsectSprays))
+```
+
+Con un 95% de confianza (p<0.05) al menos uno de los tipos de spray tiene un conteo diferente de insectos. 
+
+
+### Prueba posterior (hipótesis)
+
+En esta parte se evalua qué categorías tienen diferencia.
+
+```{r}
+aov1 = aov(count ~ spray, data = InsectSprays)
+
+avoTk = TukeyHSD(aov1, "spray")
+plot(avoTk)
+```
+
+```{r}
+library(ggplot2)
+ggplot(InsectSprays, aes(x = spray, y = count, fill = spray)) +
+  geom_boxplot() +
+  geom_jitter(size = 0.5) + 
+  theme_classic() +
+  labs(title = "Número de insectos por tipo de insecticida", 
+       x = "Inseticida", 
+       y = "Número de insectos")
+```
+
+Existe diferencia significativa entre las medidas del grupo de sprays A, B y F frente al grupo C, D y E. 
+
+### Actividad
+Realizar el análisis de la data `iris`para la medida de sepal lenght asociado al tipo de especie. 
+
+```{r}
+plot(iris)
+str(iris)
+summary(iris)
+```
+
+```{r}
+anova(lm(Sepal.Length ~ Species, data = iris))
+```
+
+```{r}
+library(ggplot2)
+ggplot(iris, aes(x = Species, y = Sepal.Length, 
+                 fill = Species)) +
+  geom_boxplot() +
+  geom_jitter(size = 0.5) + 
+  theme_classic() +
+  labs(title = "Largo del sépalo por especie", 
+       x = "Especie del género iris", 
+       y = "Largo del Sépalo [mm]")
+```
+
+Las medidas de la especie setosa son menores a las de la especie virginica. 
+
+# Análisis de relación 
+
+Identificar si la(s) variabl(s) independiente(s) afectan a la variable dependiente. 
+
+$$y = \beta_0+ \beta_1 \cdot x + \epsilon$$
+
+$H_0: $ x no afecta a y, $B_1=0$
+
+$H_a: $ x afecta a y, $B_1 \neq 0$
+
+```{r}
+summary(lm(Sepal.Length ~Sepal.Width, data = iris))
+```
+
+```{r}
+ggplot(iris, aes(x = Sepal.Width, y= Sepal.Length)) + 
+  geom_point()
+```
+
+Con un 95% de confianza el valor de $B_1 = 0$ por lo tanto no se rechaza la hipótesis nula. Se concluye que el ancho del sépalo no tiene relación con el largo del sépalo.
+
+
+### Ejemplo de alta relación
+
+$H_0: $ petal witdh no afecta a petal length, $B_1=0$
+
+$H_a: $ petal width afecta a petal length, $B_1 \neq 0$
+
+```{r}
+summary(lm(Petal.Length ~Petal.Width, data = iris))
+```
+
+Con un 95% de confianza el valor de $B_1 \neq 0$ por lo tanto se rechaza la hipótesis nula; con lo que se concluye que hay efecto del ancho del pétalo en el largo del pétalo. 
+
+El valor del largo del pétalo es de 1.08 mm cuando el valor del ancho del pétalo es cero. Asimismo, por cada 2.22 mm que incrementa el largo del pétalo, el ancho del pétalo crece en 1 mm. El coeficiente de correlación ($R^2=0.9271$) indica alta influencia. 
+
+```{r}
+ggplot(iris, aes(x = Petal.Width, y= Petal.Length)) + 
+  geom_point() + 
+  geom_smooth(method = "lm") + theme_classic() +
+  labs(title = "Largo del pétalo dependiente del ancho del pétalo", 
+       x = "Ancho del pétalo [mm]", 
+       y = "Largo del pétalo [mm]")
+
+```
+
+
+
+
