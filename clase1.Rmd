@@ -99,5 +99,9 @@ ggplot(iris, aes(x = Species, y = Sepal.Length,
 
 ```
 
+```{r}
+ggplot(iris, aes(x = Sepal.Width, ))
+## no salio
+```
 
 
