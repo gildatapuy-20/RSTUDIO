@@ -184,7 +184,14 @@ ggplot(iris, aes(x = Petal.Width, y= Petal.Length)) +
        y = "Largo del pétalo [mm]")
 
 ```
+```{r}
+install.packages("corrplot")
+```
 
+```{r}
+load("bulnesia.Rdata")
+corrplot::corrplot(cor(bulnesia, use = "complete.obs"))
+```
 
 
 

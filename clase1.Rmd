@@ -104,4 +104,7 @@ ggplot(iris, aes(x = Sepal.Width, ))
 ## no salio
 ```
 
+```{r}
+load("bulnesia.Rdata")
+```
 
